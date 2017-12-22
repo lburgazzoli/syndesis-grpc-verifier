@@ -39,7 +39,7 @@ public class Client {
 
             LOGGER.info("Reply: {}", reply.getMessage());
 
-            Thread.sleep(250);
+            Thread.sleep(1000);
         }
 
         channel.shutdown();

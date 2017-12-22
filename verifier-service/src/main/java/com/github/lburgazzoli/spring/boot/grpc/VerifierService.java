@@ -1,16 +1,16 @@
 package com.github.lburgazzoli.spring.boot.grpc;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
+import io.syndesis.verifier.api.Verifier;
+import io.syndesis.verifier.api.VerifierResponse;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Component;
-import org.apache.camel.component.extension.ComponentVerifierExtension;
+import org.apache.camel.NoSuchBeanException;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
-import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
-import org.springframework.boot.autoconfigure.cloud.CloudAutoConfiguration;
-import org.springframework.boot.autoconfigure.couchbase.CouchbaseAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.cassandra.CassandraRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
-import org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration;
 import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -38,14 +31,7 @@ import org.springframework.context.annotation.Bean;
         ArtemisAutoConfiguration.class,
         BatchAutoConfiguration.class,
         CacheAutoConfiguration.class,
-        RedisAutoConfiguration.class,
-        GsonAutoConfiguration.class,
-        JmsAutoConfiguration.class,
-        CassandraAutoConfiguration.class,
-        CassandraDataAutoConfiguration.class,
-        CassandraRepositoriesAutoConfiguration.class,
-        CloudAutoConfiguration.class,
-        CouchbaseAutoConfiguration.class,
+        GsonAutoConfiguration.class
     }
 )
 public class VerifierService {
@@ -74,41 +60,37 @@ public class VerifierService {
     }
 
 	@Bean(destroyMethod = "shutdown", initMethod = "start")
-    public Server server(BindableService service) {
-        return ServerBuilder.forPort(port)
-            .addService(service)
-            .build();
+    public Server server(List<BindableService> services) {
+        ServerBuilder builder = ServerBuilder.forPort(port);
+        services.forEach(builder::addService);
+
+        return builder.build();
     }
 
+    @SuppressWarnings("unchecked")
     @Bean
-    public BindableService service(CamelContext camelContext) {
+    public BindableService service(ApplicationContext context, CamelContext camelContext) {
         return new VerifierGrpc.VerifierImplBase() {
             @Override
             public void verify(VerifierOuterClass.VerifyRequest request, StreamObserver<VerifierOuterClass.VerifyReply> responseObserver) {
-                Component component = camelContext.getComponent(request.getId());
-                if (component != null) {
-                    Optional<ComponentVerifierExtension> extension = component.getExtension(ComponentVerifierExtension.class);
-                    if (extension.isPresent()) {
 
-                        LOGGER.info("Id: {}, options: {}", request.getId(), request.getOptionsMap());
+                try {
+                    final String connector = request.getId();
+                    final Map<String, Object> options = Map.class.cast(request.getOptionsMap());
+                    final Verifier verifier = context.getBean(connector, Verifier.class);
+                    final List<VerifierResponse> responses = verifier.verify(camelContext, connector, options);
 
-                        ComponentVerifierExtension.Result result = extension.get().verify(
-                            ComponentVerifierExtension.Scope.CONNECTIVITY,
-                            Map.class.cast(new HashMap<>(request.getOptionsMap()))
-                        );
-
-                        LOGGER.info("Result: {}", result);
+                    for (VerifierResponse response : responses) {
                         responseObserver.onNext(
                             VerifierOuterClass.VerifyReply.newBuilder()
-                                .setMessage(result.getStatus().name())
+                                .setMessage(response.getStatus().name())
                                 .build()
                         );
-                        responseObserver.onCompleted();
-                    } else {
-                        LOGGER.info("Component {} does not support validation", request.getId());
                     }
-                } else {
-                    LOGGER.info("Unknown component {}", request.getId());
+
+                    responseObserver.onCompleted();
+                } catch (NoSuchBeanException e) {
+                    LOGGER.warn("", e);
                 }
             }
         };

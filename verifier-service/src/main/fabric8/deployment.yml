@@ -1,0 +1,17 @@
+spec:
+  template:
+    spec:
+      containers:
+        -
+          resources:            
+            requests:
+              cpu: "0.2"
+              memory: 25Mi
+            limits:
+              cpu: "1.0"
+              memory: 35Mi
+          env:
+          - name: JAVA_OPTIONS
+            value: "-Xmx25m -Xms25m"
+          - name: AB_JOLOKIA_OFF
+            value: "true"
