@@ -15,12 +15,39 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
+import org.springframework.boot.autoconfigure.cloud.CloudAutoConfiguration;
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.cassandra.CassandraRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.JmsAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.activemq.ActiveMQAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
+@SpringBootApplication(
+    exclude = {
+        ActiveMQAutoConfiguration.class,
+        ArtemisAutoConfiguration.class,
+        BatchAutoConfiguration.class,
+        CacheAutoConfiguration.class,
+        RedisAutoConfiguration.class,
+        GsonAutoConfiguration.class,
+        JmsAutoConfiguration.class,
+        CassandraAutoConfiguration.class,
+        CassandraDataAutoConfiguration.class,
+        CassandraRepositoriesAutoConfiguration.class,
+        CloudAutoConfiguration.class,
+        CouchbaseAutoConfiguration.class,
+    }
+)
 public class VerifierService {
     private static final Logger LOGGER = LoggerFactory.getLogger(VerifierService.class);
 
@@ -28,8 +55,13 @@ public class VerifierService {
     private int port;
 
 	public static void main(String[] args) throws Exception {
-        ApplicationContext ctx = SpringApplication.run(VerifierService.class, args);
-        //ctx.getBean(Server.class).awaitTermination();
+        ApplicationContext ctx = new SpringApplicationBuilder()
+            .sources(VerifierService.class)
+            .web(false)
+            .build()
+            .run(args);
+
+        ctx.getBean(Server.class).awaitTermination();
     }
 
     @Bean(destroyMethod = "stop", initMethod = "start")

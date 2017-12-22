@@ -1,9 +1,12 @@
 group = 'com.github.lburgazzoli'
 version = '0.0.1-SNAPSHOT'
 
+apply plugin: 'maven'
+
 subprojects {
 
     apply plugin: 'java'
+    apply plugin: 'maven'
 
     repositories {
         mavenCentral()

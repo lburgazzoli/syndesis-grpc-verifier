@@ -7,7 +7,15 @@
 classes
 out
 build
+bin
+target
+protoGen
 .idea
 .gradle
+.classpath
+.project
+.settings
+.vscode
+
 
 
