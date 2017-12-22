@@ -1,0 +1,3 @@
+include 'verifier-common'
+include 'verifier-service'
+include 'verifier-client'

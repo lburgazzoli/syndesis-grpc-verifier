@@ -1,0 +1,15 @@
+group = 'com.github.lburgazzoli'
+version = '0.0.1-SNAPSHOT'
+
+subprojects {
+
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}

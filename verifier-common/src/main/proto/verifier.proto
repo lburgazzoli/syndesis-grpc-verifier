@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "com.github.lburgazzoli.spring.boot.grpc";
+
+
+service Verifier {
+    rpc verify(VerifyRequest) returns (VerifyReply);
+}
+
+message VerifyRequest {
+    string id = 1;
+    map<string, string> options = 2;
+}
+
+message VerifyReply {
+    string message = 1;
+}

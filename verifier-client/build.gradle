@@ -1,0 +1,26 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.9.RELEASE'
+        grpcVersion = '1.8.0'
+
+	}
+	repositories {
+		mavenCentral()
+		jcenter()
+		maven { url 'http://repo.spring.io/plugins-release' }
+		maven { url "https://plugins.gradle.org/m2/"}
+	}
+}
+
+group = 'com.github.lburgazzoli'
+version = '0.0.1-SNAPSHOT'
+
+dependencies {
+    compile project(':verifier-common')
+
+	compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'org.slf4j:slf4j-simple:1.7.25'
+    compile 'io.grpc:grpc-netty:1.8.0'
+    compile 'io.grpc:grpc-protobuf:1.8.0'
+    compile 'io.grpc:grpc-stub:1.8.0'
+}
