@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_package = "com.github.lburgazzoli.spring.boot.grpc";
+
+
+service Health {
+    rpc health(HealthRequest) returns (HealthReply);
+}
+
+message HealthRequest {
+}
+
+message HealthReply {
+    string status = 1;
+    string description = 2;
+}

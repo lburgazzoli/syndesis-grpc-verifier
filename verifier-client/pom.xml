@@ -11,7 +11,7 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>verifier-service</artifactId>
+  <artifactId>verifier-client</artifactId>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -37,26 +37,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.syndesis.connector</groupId>
-      <artifactId>connector-twitter</artifactId>
-      <version>${syndesis.version}</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.syndesis.connector</groupId>
-      <artifactId>connector-verifier</artifactId>
-      <version>${syndesis.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-validator</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
     </dependency>
   </dependencies>
 
@@ -67,15 +53,18 @@
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
             <goals>
-              <goal>repackage</goal>
+              <goal>java</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <mainClass>com.github.lburgazzoli.spring.boot.grpc.VerifierClient</mainClass>
+        </configuration>
       </plugin>
     </plugins>
   </build>
