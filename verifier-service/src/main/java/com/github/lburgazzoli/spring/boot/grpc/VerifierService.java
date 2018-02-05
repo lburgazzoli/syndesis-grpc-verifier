@@ -3,6 +3,7 @@ package com.github.lburgazzoli.spring.boot.grpc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.grpc.BindableService;
 import io.grpc.Server;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.HealthEndpoint;
 import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
@@ -127,6 +130,20 @@ public class VerifierService {
                 );
 
                 responseObserver.onCompleted();
+            }
+        };
+    }
+
+    @Bean
+    public HealthIndicator grpcHealthIndicator() {
+	    final AtomicInteger counter = new AtomicInteger();
+
+	    return new HealthIndicator() {
+            @Override
+            public Health health() {
+                return new Health.Builder()
+                    .status(counter.incrementAndGet() % 2 == 0 ? Status.UP : Status.DOWN)
+                    .build();
             }
         };
     }
