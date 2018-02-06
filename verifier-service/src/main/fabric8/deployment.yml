@@ -3,15 +3,15 @@ spec:
     spec:
       containers:
         -
-          resources:            
+          resources:
             requests:
               cpu: "0.2"
               memory: 25Mi
             limits:
               cpu: "1.0"
-              memory: 35Mi
+              memory: 50Mi
           env:
           - name: JAVA_OPTIONS
-            value: "-Xmx25m -Xms25m"
+            value: "-Xmx50m -Xms25m"
           - name: AB_JOLOKIA_OFF
             value: "true"

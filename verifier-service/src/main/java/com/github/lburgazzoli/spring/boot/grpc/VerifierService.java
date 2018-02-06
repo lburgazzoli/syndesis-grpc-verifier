@@ -48,6 +48,7 @@ public class VerifierService {
     @Bean(destroyMethod = "stop", initMethod = "start")
     public CamelContext camel() {
         DefaultCamelContext context = new DefaultCamelContext();
+        context.setAutoStartup(false);
         context.setName("grpc-verifier");
         context.disableJMX();
 
